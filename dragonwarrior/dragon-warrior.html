@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Dragon Warrior" />
+  <meta name="theme-color" content="#0D0F14" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Dragon Warrior" />
+  <title>Dragon Warrior</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230D0F14'/%3E%3Ctext x='256' y='340' font-size='280' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%90%89%3C/text%3E%3C/svg%3E" />
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Dragon+Warrior+Training%22%2C%22short_name%22%3A%22Dragon+Warrior%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230D0F14%22%2C%22theme_color%22%3A%22%230D0F14%22%2C%22orientation%22%3A%22portrait%22%7D" />
+  <style>
+    html, body, #root { margin:0; padding:0; min-height:100vh; background:#0D0F14; overscroll-behavior:none; }
+    #root { padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+const PILLARS = [
+  {
+    key:"body", label:"Body", sub:"Physical", icon:"🔥",
+    color:"#E8543A", glow:"rgba(232,84,58,0.35)", dim:"rgba(232,84,58,0.12)",
+    identity:"I am forged in fire. My body is not separate from my will — it is the expression of it. Every movement is a declaration. I do not hope to be strong. I am strong, and I prove it daily.",
+    premise:"The dragon's power begins in the flesh. A strong body is not vanity — it is the vessel that carries everything else. You do not train to look powerful. You train to become it.",
+    practices:[
+      { key:"strength", label:"Strength", icon:"⚔️", desc:"The foundation of the dragon's power. Lift, push, pull — bodyweight, iron, or anything in between. Build muscle, forge will." },
+      { key:"agility", label:"Agility", icon:"🌀", desc:"A warrior who cannot move freely is already defeated. Stretch, flow, and restore the body's range. Flexibility is strength in disguise." },
+      { key:"endurance", label:"Endurance", icon:"🏃", desc:"The dragon that outlasts its opponent wins without striking. Run, swim, cycle — build the engine that never quits." },
+      { key:"cold", label:"Resilience", icon:"❄️", desc:"Step into discomfort willingly. Cold showers, ice baths, hard days — the dragon that chooses difficulty builds armour that comfort never could." },
+    ],
+  },
+  {
+    key:"mind", label:"Mind", sub:"Mental", icon:"⚡",
+    color:"#5B8FD4", glow:"rgba(91,143,212,0.35)", dim:"rgba(91,143,212,0.12)",
+    identity:"I am clarity in motion. My mind does not drift — it cuts. I choose what I feed it, what I silence, and what I pursue. I do not wait for focus. I am focus.",
+    premise:"The sharpest weapon a dragon carries is its mind. Every battle is won or lost before the first move. Mental training is deliberate, daily, and uncomfortable.",
+    practices:[
+      { key:"intelligence", label:"Intelligence", icon:"🧠", desc:"Feed the mind things that resist you. Deep reading, hard problems, strategic thinking. The brain is a muscle — it only grows under load." },
+      { key:"charisma", label:"Charisma", icon:"💬", desc:"Power is multiplied through people. Language, communication, storytelling — these are weapons. Sharpen them." },
+      { key:"wisdom", label:"Wisdom", icon:"🔮", desc:"Knowledge tells you what to do. Wisdom tells you who to be. Meditate, journal, visualise, breathe. Turn inward. The answers are already there." },
+    ],
+  },
+  {
+    key:"craft", label:"Craft", sub:"Skill", icon:"⚔️",
+    color:"#7DBF8E", glow:"rgba(125,191,142,0.35)", dim:"rgba(125,191,142,0.12)",
+    identity:"I am a builder of worlds. My craft is not what I do — it is who I am. I show up to the work whether or not I feel ready. I do not wait for inspiration. I am the source of it.",
+    premise:"The sword is only as good as the hand that wields it. Craft is the discipline of mastery — showing up to your work even when inspiration is absent.",
+    practices:[
+      { key:"create", label:"Create", icon:"⚒️", desc:"What did you make today? It does not have to be finished. It does not have to be perfect. The act of creation itself is the practice." },
+      { key:"play", label:"Play", icon:"🥋", desc:"The master never stops drilling. Keep the sword sharp not through discipline alone, but through love of the blade." },
+      { key:"share", label:"Share", icon:"📢", desc:"Creation without an audience is a sword never drawn. Put the work into the world. Ship it, post it, present it." },
+      { key:"help", label:"Help", icon:"🤝", desc:"The highest expression of mastery is lifting others. Teach, mentor, give feedback, collaborate. What you give away compounds." },
+      { key:"discipline", label:"Discipline", icon:"⚙️", desc:"Not all craft is glorious. Admin, maintenance, follow-through — the unglamorous work separates the amateur from the professional." },
+    ],
+  },
+  {
+    key:"energy", label:"Energy", sub:"Vitality", icon:"✨",
+    color:"#9B7FD4", glow:"rgba(155,127,212,0.35)", dim:"rgba(155,127,212,0.12)",
+    identity:"I am the source of my own energy. I do not run on fumes and call it strength. I tend to the fire within — I sleep, I nourish, I restore. Everything else is built on this foundation.",
+    premise:"You can train hard, think sharp, and work your craft — but if your energy is depleted, none of it matters. Energy is not a luxury. It is the foundation everything else runs on.",
+    practices:[
+      { key:"sleep", label:"Sleep", icon:"😴", desc:"Where the body rebuilds, the mind consolidates, and the soul restores. No supplement, no hack replaces sleep. Protect it." },
+      { key:"nutrition", label:"Nutrition", icon:"🥗", desc:"Fuel the dragon, don't poison it. Eating well is not restriction — it is respect for the machine you are building." },
+      { key:"hydration", label:"Hydration", icon:"💧", desc:"The simplest performance enhancer that most warriors ignore. Your body is mostly water. Treat it accordingly." },
+      { key:"sunlight", label:"Sunlight", icon:"☀️", desc:"Morning light is a biological signal that sets your entire day. Step outside. The dragon was not built for caves." },
+      { key:"soulwork", label:"Soul Work", icon:"🙏", desc:"Gratitude, stillness, presence. The fire within needs tending, not just fuelling. A moment of silence is not wasted — it is armour." },
+    ],
+  },
+];
+
+const RANKS = [
+  { min:0,   max:9,   title:"Hatchling",    icon:"🥚", desc:"The fire is just beginning to stir within you." },
+  { min:10,  max:24,  title:"Whelp",         icon:"🐲", desc:"You have felt what it means to begin. Do not stop." },
+  { min:25,  max:49,  title:"Warrior",       icon:"🐉", desc:"The path is becoming a part of you." },
+  { min:50,  max:99,  title:"Dragon Knight", icon:"⚔️", desc:"Few reach here. Fewer remain. You remain." },
+  { min:100, max:199, title:"Dragon Lord",   icon:"🔱", desc:"You command the elements. Others feel your presence." },
+  { min:200, max:Infinity, title:"Dragon Master", icon:"👑", desc:"You are no longer becoming. You are." },
+];
+
+const BADGES = {
+  strength:    [{id:"strength_1",name:"Scale Bearer",req:10,type:"volume"},{id:"strength_2",name:"Iron Dragon",req:25,type:"volume"},{id:"strength_3",name:"Dragon's Fury",req:50,type:"volume"},{id:"strength_c",name:"Forged in Fire",req:7,type:"streak"}],
+  agility:     [{id:"agility_1",name:"Limber Whelp",req:10,type:"volume"},{id:"agility_2",name:"Serpent's Grace",req:25,type:"volume"},{id:"agility_3",name:"Shadow Strike",req:50,type:"volume"},{id:"agility_c",name:"Wind Walker",req:7,type:"streak"}],
+  endurance:   [{id:"endurance_1",name:"Dragon's Breath",req:10,type:"volume"},{id:"endurance_2",name:"Ironlung",req:25,type:"volume"},{id:"endurance_3",name:"Eternal Flame",req:50,type:"volume"},{id:"endurance_c",name:"The Long Burn",req:7,type:"streak"}],
+  cold:        [{id:"cold_1",name:"Cold Blood",req:10,type:"volume"},{id:"cold_2",name:"Frost Scale",req:25,type:"volume"},{id:"cold_3",name:"Winter Dragon",req:50,type:"volume"},{id:"cold_c",name:"The Unbreakable",req:7,type:"streak"}],
+  intelligence:[{id:"intelligence_1",name:"Awakened Mind",req:10,type:"volume"},{id:"intelligence_2",name:"Lore Keeper",req:25,type:"volume"},{id:"intelligence_3",name:"Dragon Sage",req:50,type:"volume"},{id:"intelligence_c",name:"Relentless Thinker",req:7,type:"streak"}],
+  charisma:    [{id:"charisma_1",name:"Silver Tongue",req:10,type:"volume"},{id:"charisma_2",name:"Dragon's Voice",req:25,type:"volume"},{id:"charisma_3",name:"The Sovereign",req:50,type:"volume"},{id:"charisma_c",name:"Words Like Fire",req:7,type:"streak"}],
+  wisdom:      [{id:"wisdom_1",name:"Still Waters",req:10,type:"volume"},{id:"wisdom_2",name:"The Inner Flame",req:25,type:"volume"},{id:"wisdom_3",name:"Ancient Eyes",req:50,type:"volume"},{id:"wisdom_c",name:"The Unshakeable",req:7,type:"streak"}],
+  create:      [{id:"create_1",name:"Spark Bearer",req:10,type:"volume"},{id:"create_2",name:"World Builder",req:25,type:"volume"},{id:"create_3",name:"The Architect",req:50,type:"volume"},{id:"create_c",name:"Endless Creation",req:7,type:"streak"}],
+  play:        [{id:"play_1",name:"Eager Blade",req:10,type:"volume"},{id:"play_2",name:"The Sharpened Edge",req:25,type:"volume"},{id:"play_3",name:"Blade Master",req:50,type:"volume"},{id:"play_c",name:"Born to Play",req:7,type:"streak"}],
+  share:       [{id:"share_1",name:"First Blood",req:10,type:"volume"},{id:"share_2",name:"The Messenger",req:25,type:"volume"},{id:"share_3",name:"Dragon's Herald",req:50,type:"volume"},{id:"share_c",name:"Voice of the Dragon",req:7,type:"streak"}],
+  help:        [{id:"help_1",name:"Kind Scale",req:10,type:"volume"},{id:"help_2",name:"The Mentor",req:25,type:"volume"},{id:"help_3",name:"Dragon's Hand",req:50,type:"volume"},{id:"help_c",name:"In Service of Many",req:7,type:"streak"}],
+  discipline:  [{id:"discipline_1",name:"The Grind",req:10,type:"volume"},{id:"discipline_2",name:"Stone Will",req:25,type:"volume"},{id:"discipline_3",name:"Unrelenting",req:50,type:"volume"},{id:"discipline_c",name:"The Machine",req:7,type:"streak"}],
+  sleep:       [{id:"sleep_1",name:"Night Scale",req:10,type:"volume"},{id:"sleep_2",name:"Dream Walker",req:25,type:"volume"},{id:"sleep_3",name:"The Restored",req:50,type:"volume"},{id:"sleep_c",name:"Sacred Rest",req:7,type:"streak"}],
+  nutrition:   [{id:"nutrition_1",name:"Flame Fed",req:10,type:"volume"},{id:"nutrition_2",name:"Dragon's Diet",req:25,type:"volume"},{id:"nutrition_3",name:"The Nourished",req:50,type:"volume"},{id:"nutrition_c",name:"Fuel the Fire",req:7,type:"streak"}],
+  hydration:   [{id:"hydration_1",name:"River Scale",req:10,type:"volume"},{id:"hydration_2",name:"The Current",req:25,type:"volume"},{id:"hydration_3",name:"Tidal Force",req:50,type:"volume"},{id:"hydration_c",name:"Living Water",req:7,type:"streak"}],
+  sunlight:    [{id:"sunlight_1",name:"Dawn Watcher",req:10,type:"volume"},{id:"sunlight_2",name:"Solar Scale",req:25,type:"volume"},{id:"sunlight_3",name:"Child of the Sun",req:50,type:"volume"},{id:"sunlight_c",name:"Rise and Burn",req:7,type:"streak"}],
+  soulwork:    [{id:"soulwork_1",name:"The Quiet",req:10,type:"volume"},{id:"soulwork_2",name:"Inner Sanctum",req:25,type:"volume"},{id:"soulwork_3",name:"Soul of the Dragon",req:50,type:"volume"},{id:"soulwork_c",name:"The Sacred Flame",req:7,type:"streak"}],
+};
+
+const CREED = [
+  "I am the Dragon Warrior.",
+  "I do not wait to feel ready.",
+  "I forge my body in fire, my mind in silence, my craft in relentless work.",
+  "I tend to my energy like a sacred flame.",
+  "I do not compete with others. I compete with who I was yesterday.",
+  "I fall. I rise. I continue.",
+  "This is not what I do.",
+  "This is who I am.",
+];
+
+const OATHS = [
+  "The dragon does not rise by wishing. It rises by doing.",
+  "Scales are earned one day at a time.",
+  "Train the body. Sharpen the mind. Master the craft. Tend the flame.",
+  "A warrior rests — a dragon never quits.",
+  "Fire is forged in repetition, not inspiration.",
+  "What you do in the dark builds what shines in the light.",
+  "The strongest dragons were once hatchlings who refused to stop.",
+];
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const WORK_DURATION = 90*60, REST_DURATION = 20*60;
+const SCALE_BG = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='24'%3E%3Cpath d='M14,0 Q28,12 14,24 Q0,12 14,0Z' fill='none' stroke='rgba(200,169,110,0.055)' stroke-width='0.8'/%3E%3Cpath d='M0,0 Q14,12 0,24' fill='none' stroke='rgba(200,169,110,0.03)' stroke-width='0.6'/%3E%3Cpath d='M28,0 Q14,12 28,24' fill='none' stroke='rgba(200,169,110,0.03)' stroke-width='0.6'/%3E%3C/svg%3E\")";
+
+function dayKey(y,m,d){ return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`; }
+function getDaysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function getFirstDay(y,m){ return new Date(y,m,1).getDay(); }
+function hexToRgb(hex){ return `${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)}`; }
+function fmtTime(s){ const m=Math.floor(s/60),sec=s%60; return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`; }
+function loadData(){ try{ return JSON.parse(localStorage.getItem("dw_v5")||"{}"); }catch{ return {}; } }
+function saveData(d){ try{ localStorage.setItem("dw_v5",JSON.stringify(d)); }catch{} }
+function clearData(){ try{ localStorage.removeItem("dw_v5"); }catch{} }
+function getRank(pts){ return RANKS.find(r=>pts>=r.min&&pts<=r.max)||RANKS[0]; }
+function getDragonPoints(data){ return Object.values(data).filter(e=>PILLARS.every(p=>e[p.key])).length; }
+function getDragonPointStreak(data,todayKey){
+  let streak=0; const d=new Date(todayKey);
+  while(streak<=365){
+    const k=dayKey(d.getFullYear(),d.getMonth(),d.getDate());
+    const e=data[k]||{};
+    if(!PILLARS.every(p=>e[p.key])&&k!==todayKey) break;
+    if(PILLARS.every(p=>e[p.key])) streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+function getTotalDays(data){ return Object.values(data).filter(e=>PILLARS.some(p=>e[p.key])).length; }
+function getFullDays(data){ return Object.values(data).filter(e=>PILLARS.every(p=>e[p.key])).length; }
+function getPillarDays(data,key){ return Object.values(data).filter(e=>e[key]).length; }
+function getPracticeCounts(data,pillarKey){
+  const counts={};
+  Object.values(data).forEach(entry=>{ const ps=entry[`${pillarKey}_practices`]||[]; ps.forEach(p=>{ counts[p]=(counts[p]||0)+1; }); });
+  return counts;
+}
+function getAllPracticeCounts(data){
+  const counts={};
+  PILLARS.forEach(pillar=>{ pillar.practices.forEach(practice=>{ let vol=0; Object.values(data).forEach(entry=>{ const ps=entry[`${pillar.key}_practices`]||[]; if(ps.includes(practice.label)) vol++; }); counts[practice.key]={volume:vol,pillar,practice}; }); });
+  return counts;
+}
+function getPracticeStreak(data,pillarKey,practiceLabel,todayKey){
+  let streak=0; const d=new Date(todayKey);
+  while(streak<=365){
+    const k=dayKey(d.getFullYear(),d.getMonth(),d.getDate());
+    const ps=(data[k]||{})[`${pillarKey}_practices`]||[];
+    if(!ps.includes(practiceLabel)&&k!==todayKey) break;
+    if(ps.includes(practiceLabel)) streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+function getBestStreak(data){
+  const keys=Object.keys(data).filter(k=>PILLARS.some(p=>data[k][p.key])).sort();
+  let best=0,cur=0,prev=null;
+  for(const k of keys){ if(prev){ const diff=(new Date(k)-new Date(prev))/86400000; cur=diff===1?cur+1:1; } else cur=1; if(cur>best) best=cur; prev=k; }
+  return best;
+}
+function getUnlockedBadges(data,todayKey){
+  const unlocked=new Set();
+  const pCounts=getAllPracticeCounts(data);
+  PILLARS.forEach(pillar=>{ pillar.practices.forEach(practice=>{ const vol=pCounts[practice.key]?.volume||0; const streak=getPracticeStreak(data,pillar.key,practice.label,todayKey); (BADGES[practice.key]||[]).forEach(badge=>{ if(badge.type==="volume"&&vol>=badge.req) unlocked.add(badge.id); if(badge.type==="streak"&&streak>=badge.req) unlocked.add(badge.id); }); }); });
+  return unlocked;
+}
+
+
+function PracticePanel({pillar,existingPractices,onSave,onClose}){
+  const [selected,setSelected]=useState(new Set(existingPractices||[]));
+  function toggle(p){ setSelected(prev=>{ const n=new Set(prev); n.has(p)?n.delete(p):n.add(p); return n; }); }
+  const isEmpty=selected.size===0;
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(8,10,14,0.95)",backdropFilter:"blur(8px)",display:"flex",flexDirection:"column",overflowY:"auto",paddingTop:"env(safe-area-inset-top)",paddingBottom:"env(safe-area-inset-bottom)"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"48px 24px 20px"}}>
+        <div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.3em",color:pillar.color,opacity:0.7,textTransform:"uppercase",marginBottom:4}}>Log Practice</div>
+          <h2 style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:700,color:pillar.color,letterSpacing:"0.06em"}}>{pillar.icon} {pillar.label}</h2>
+        </div>
+        <button onClick={onClose} style={{background:"none",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 14px",cursor:"pointer",color:"#9A8E77",fontSize:11,fontFamily:"'Cinzel',serif",letterSpacing:"0.1em"}}>Cancel</button>
+      </div>
+      <div style={{padding:"0 16px",maxWidth:480,margin:"0 auto",width:"100%",display:"flex",flexDirection:"column",gap:10}}>
+        <button onClick={()=>toggle("General")} style={{background:selected.has("General")?pillar.dim:"rgba(255,255,255,0.02)",border:`1px solid ${selected.has("General")?pillar.color:"rgba(255,255,255,0.1)"}`,borderRadius:12,padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",boxShadow:selected.has("General")?`0 0 14px ${pillar.glow}`:"none",transition:"all 0.2s"}}>
+          <div style={{textAlign:"left"}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:12,letterSpacing:"0.1em",color:selected.has("General")?pillar.color:"#9A8E77",textTransform:"uppercase"}}>⚡ General</div>
+            <div style={{fontSize:10,color:"#6B6255",marginTop:3}}>Just did it — no specific practice to log</div>
+          </div>
+          <div style={{width:18,height:18,borderRadius:"50%",border:`1.5px solid ${selected.has("General")?pillar.color:"rgba(255,255,255,0.15)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            {selected.has("General")&&<div style={{width:8,height:8,borderRadius:"50%",background:pillar.color,boxShadow:`0 0 5px ${pillar.color}`}}/>}
+          </div>
+        </button>
+        {pillar.practices.map(p=>(
+          <button key={p.key} onClick={()=>toggle(p.label)} style={{background:selected.has(p.label)?`rgba(${hexToRgb(pillar.color)},0.1)`:"rgba(255,255,255,0.02)",border:`1px solid ${selected.has(p.label)?pillar.color:"rgba(255,255,255,0.08)"}`,borderLeft:`3px solid ${selected.has(p.label)?pillar.color:"rgba(255,255,255,0.08)"}`,borderRadius:12,padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,transition:"all 0.15s",textAlign:"left"}}>
+            <div style={{flex:1}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:12,letterSpacing:"0.1em",color:selected.has(p.label)?pillar.color:"#9A8E77",textTransform:"uppercase",marginBottom:5}}>{p.icon} {p.label}</div>
+              <div style={{fontSize:11,color:"#6B6255",lineHeight:1.6}}>{p.desc}</div>
+            </div>
+            <div style={{width:18,height:18,borderRadius:"50%",border:`1.5px solid ${selected.has(p.label)?pillar.color:"rgba(255,255,255,0.12)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:2}}>
+              {selected.has(p.label)&&<div style={{width:8,height:8,borderRadius:"50%",background:pillar.color,boxShadow:`0 0 5px ${pillar.color}`}}/>}
+            </div>
+          </button>
+        ))}
+      </div>
+      <div style={{padding:"20px 24px 48px",maxWidth:480,margin:"0 auto",width:"100%"}}>
+        <button onClick={()=>onSave([...selected])} style={{width:"100%",display:"block",background:isEmpty?"rgba(255,60,60,0.08)":`rgba(${hexToRgb(pillar.color)},0.15)`,border:`1px solid ${isEmpty?"rgba(255,60,60,0.25)":pillar.color}`,borderRadius:100,padding:"14px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:12,letterSpacing:"0.15em",color:isEmpty?"#8B4444":pillar.color,textTransform:"uppercase",boxShadow:isEmpty?"none":`0 0 20px rgba(${hexToRgb(pillar.color)},0.2)`,transition:"all 0.2s"}}>
+          {isEmpty?"Clear Log":`Log ${selected.size} Practice${selected.size>1?"s":""}`}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CreedScreen({onClose}){
+  const [lineIndex,setLineIndex]=useState(0);
+  useEffect(()=>{ const t=setInterval(()=>setLineIndex(i=>{ if(i>=CREED.length-1){clearInterval(t);return i;} return i+1; }),900); return ()=>clearInterval(t); },[]);
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:200,background:"#0A0C10",backgroundImage:SCALE_BG,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"env(safe-area-inset-top) 32px env(safe-area-inset-bottom)"}}>
+      <div style={{fontSize:48,marginBottom:32,filter:"drop-shadow(0 0 24px #C8A96E)"}}>🐉</div>
+      <div style={{display:"flex",flexDirection:"column",gap:16,maxWidth:340,width:"100%",marginBottom:48}}>
+        {CREED.map((line,i)=>(
+          <div key={i} style={{fontFamily:"'Cinzel',serif",fontSize:i===0?18:i>=6?15:13,fontWeight:i===0||i>=6?700:400,color:i===0?"#C8A96E":i>=6?"#D4C9B0":"#9A8E77",letterSpacing:"0.06em",lineHeight:1.6,textAlign:"center",opacity:i<=lineIndex?1:0,transform:i<=lineIndex?"translateY(0)":"translateY(8px)",transition:"opacity 0.6s ease, transform 0.6s ease"}}>{line}</div>
+        ))}
+      </div>
+      {lineIndex>=CREED.length-1&&<button onClick={onClose} style={{background:"rgba(200,169,110,0.1)",border:"1px solid #C8A96E",borderRadius:100,padding:"12px 36px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:"0.2em",color:"#C8A96E",textTransform:"uppercase"}}>I Am Ready</button>}
+    </div>
+  );
+}
+
+function StatsModal({data,streak,dragonPoints,dpStreak,onClose,onReset}){
+  const [confirmReset,setConfirmReset]=useState(false);
+  const [expandedPillar,setExpandedPillar]=useState(null);
+  const totalDays=getTotalDays(data);
+  const fullDays=getFullDays(data);
+  const bestStreak=getBestStreak(data);
+  const rank=getRank(dragonPoints);
+  const rankIdx=RANKS.indexOf(rank);
+  const nextRank=RANKS[rankIdx+1];
+  const rankProgress=nextRank?(dragonPoints-rank.min)/(nextRank.min-rank.min):1;
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(8,10,14,0.97)",backdropFilter:"blur(8px)",display:"flex",flexDirection:"column",overflowY:"auto",paddingTop:"env(safe-area-inset-top)",paddingBottom:"env(safe-area-inset-bottom)"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"48px 24px 24px"}}>
+        <h2 style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:700,color:"#C8A96E",letterSpacing:"0.06em"}}>Chronicle</h2>
+        <button onClick={onClose} style={{background:"none",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 14px",cursor:"pointer",color:"#9A8E77",fontSize:11,fontFamily:"'Cinzel',serif",letterSpacing:"0.1em"}}>Close</button>
+      </div>
+      <div style={{padding:"0 16px",display:"flex",flexDirection:"column",gap:12,maxWidth:480,margin:"0 auto",width:"100%"}}>
+        <div style={{background:"rgba(200,169,110,0.07)",border:"1px solid rgba(200,169,110,0.2)",borderRadius:14,padding:20}}>
+          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:16}}>
+            <span style={{fontSize:36,filter:"drop-shadow(0 0 12px #C8A96E)"}}>{rank.icon}</span>
+            <div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.25em",color:"#9A8E77",textTransform:"uppercase",marginBottom:3}}>Current Rank</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:700,color:"#C8A96E"}}>{rank.title}</div>
+            </div>
+            <div style={{marginLeft:"auto",textAlign:"center"}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:24,fontWeight:700,color:"#C8A96E"}}>{dragonPoints}</div>
+              <div style={{fontSize:8,letterSpacing:"0.15em",color:"#9A8E77",textTransform:"uppercase"}}>Dragon Pts</div>
+            </div>
+          </div>
+          {nextRank&&(<>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+              <span style={{fontSize:9,color:"#6B6255",textTransform:"uppercase",letterSpacing:"0.1em"}}>{dragonPoints} pts</span>
+              <span style={{fontSize:9,color:"#6B6255",textTransform:"uppercase",letterSpacing:"0.1em"}}>{nextRank.min} for {nextRank.title}</span>
+            </div>
+            <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:2,overflow:"hidden"}}>
+              <div style={{height:"100%",width:`${rankProgress*100}%`,background:"linear-gradient(90deg,#C8A96E,#E8B84B)",borderRadius:2,boxShadow:"0 0 8px rgba(200,169,110,0.4)"}}/>
+            </div>
+            <div style={{fontSize:9,color:"#6B6255",marginTop:5}}>{nextRank.min-dragonPoints} points until {nextRank.title}</div>
+          </>)}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          {[{val:dragonPoints,label:"Dragon Points"},{val:dpStreak,label:"Point Streak"},{val:streak,label:"Training Streak"},{val:fullDays,label:"Full Warrior Days"},{val:totalDays,label:"Days Trained"},{val:bestStreak,label:"Best Streak"}].map(s=>(
+            <div key={s.label} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"14px 16px"}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:700,color:"#C8A96E",lineHeight:1}}>{s.val}</div>
+              <div style={{fontSize:9,letterSpacing:"0.14em",color:"#6B6255",marginTop:5,textTransform:"uppercase"}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:18}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.25em",color:"#6B6255",textTransform:"uppercase",marginBottom:16}}>Pillar Breakdown</div>
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {PILLARS.map(p=>{
+              const days=getPillarDays(data,p.key);
+              const pct=totalDays>0?days/totalDays:0;
+              const topPractices=Object.entries(getPracticeCounts(data,p.key)).sort((a,b)=>b[1]-a[1]).slice(0,3);
+              const isExpanded=expandedPillar===p.key;
+              return (
+                <div key={p.key}>
+                  <button onClick={()=>setExpandedPillar(isExpanded?null:p.key)} style={{width:"100%",background:"none",border:"none",cursor:"pointer",padding:0}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                      <div style={{display:"flex",alignItems:"center",gap:7}}>
+                        <span style={{fontSize:14}}>{p.icon}</span>
+                        <span style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:"0.1em",color:p.color,textTransform:"uppercase"}}>{p.label}</span>
+                      </div>
+                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                        <span style={{fontFamily:"'Cinzel',serif",fontSize:13,color:p.color}}>{days} <span style={{fontSize:9,color:"#6B6255"}}>days</span></span>
+                        <span style={{fontSize:10,color:"#6B6255"}}>{isExpanded?"▲":"▼"}</span>
+                      </div>
+                    </div>
+                    <div style={{height:3,background:"rgba(255,255,255,0.05)",borderRadius:2,overflow:"hidden"}}>
+                      <div style={{height:"100%",width:`${pct*100}%`,background:p.color,borderRadius:2,boxShadow:`0 0 6px ${p.color}`}}/>
+                    </div>
+                  </button>
+                  {isExpanded&&<div style={{marginTop:10,paddingLeft:8,display:"flex",flexDirection:"column",gap:5}}>
+                    {topPractices.length>0?topPractices.map(([name,count])=>(
+                      <div key={name} style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                        <span style={{fontSize:11,color:"#9A8E77"}}>{name}</span>
+                        <span style={{fontSize:11,color:p.color,fontFamily:"'Cinzel',serif"}}>{count}×</span>
+                      </div>
+                    )):<div style={{fontSize:11,color:"#6B6255",fontStyle:"italic"}}>No practices logged yet</div>}
+                  </div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div style={{background:"rgba(255,60,60,0.04)",border:"1px solid rgba(255,60,60,0.12)",borderRadius:14,padding:18}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.25em",color:"#8B4444",textTransform:"uppercase",marginBottom:8}}>Reset Journey</div>
+          <div style={{fontSize:11,color:"#9A8E77",lineHeight:1.6,marginBottom:14}}>Wipes all training data and returns you to Hatchling. This cannot be undone.</div>
+          {!confirmReset?<button onClick={()=>setConfirmReset(true)} style={{background:"none",border:"1px solid rgba(255,60,60,0.3)",borderRadius:100,padding:"9px 20px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.12em",color:"#8B4444",textTransform:"uppercase"}}>Reset Journey</button>:(
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              <div style={{fontSize:11,color:"#E8543A",fontFamily:"'Cinzel',serif",fontStyle:"italic"}}>Are you sure? All progress will be lost.</div>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={()=>{clearData();onReset();onClose();}} style={{background:"rgba(232,84,58,0.15)",border:"1px solid #E8543A",borderRadius:100,padding:"9px 20px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.12em",color:"#E8543A",textTransform:"uppercase"}}>Yes, Reset</button>
+                <button onClick={()=>setConfirmReset(false)} style={{background:"none",border:"1px solid rgba(255,255,255,0.1)",borderRadius:100,padding:"9px 20px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.12em",color:"#9A8E77",textTransform:"uppercase"}}>Cancel</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function BadgesPage({data,dragonPoints,todayKey}){
+  const rank=getRank(dragonPoints);
+  const rankIdx=RANKS.indexOf(rank);
+  const nextRank=RANKS[rankIdx+1];
+  const rankProgress=nextRank?(dragonPoints-rank.min)/(nextRank.min-rank.min):1;
+  const unlocked=getUnlockedBadges(data,todayKey);
+  const pCounts=getAllPracticeCounts(data);
+  const totalBadges=Object.values(BADGES).reduce((a,b)=>a+b.length,0);
+
+  return (
+    <div style={{paddingBottom:90,background:"#0D0F14",backgroundImage:SCALE_BG,minHeight:"100vh"}}>
+      <div style={{textAlign:"center",padding:"36px 24px 20px"}}>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.35em",color:"#C8A96E",opacity:0.7,textTransform:"uppercase",marginBottom:6}}>Dragon Level</div>
+        <div style={{fontSize:52,marginBottom:8,filter:"drop-shadow(0 0 20px #C8A96E)"}}>{rank.icon}</div>
+        <h2 style={{fontFamily:"'Cinzel',serif",fontSize:"clamp(20px,5vw,30px)",fontWeight:700,color:"#C8A96E",margin:"0 0 6px",letterSpacing:"0.06em"}}>{rank.title}</h2>
+        <p style={{fontSize:11,color:"#9A8E77",fontStyle:"italic",marginBottom:16,lineHeight:1.6}}>{rank.desc}</p>
+        <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:16,flexWrap:"wrap"}}>
+          {RANKS.map((r,i)=>{
+            const isActive=r.title===rank.title;
+            const isPast=i<rankIdx;
+            return (
+              <div key={r.title} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,opacity:isPast||isActive?1:0.3}}>
+                <div style={{fontSize:isActive?22:16,filter:isActive?"drop-shadow(0 0 8px #C8A96E)":"none",transition:"all 0.3s"}}>{r.icon}</div>
+                <div style={{fontSize:7,letterSpacing:"0.1em",color:isActive?"#C8A96E":"#6B6255",textTransform:"uppercase",fontFamily:"'Cinzel',serif",whiteSpace:"nowrap"}}>{r.title}</div>
+                {isActive&&<div style={{width:20,height:1.5,background:"#C8A96E",borderRadius:1,boxShadow:"0 0 4px #C8A96E"}}/>}
+              </div>
+            );
+          })}
+        </div>
+        {nextRank&&(
+          <div style={{maxWidth:240,margin:"0 auto 8px"}}>
+            <div style={{height:3,background:"rgba(255,255,255,0.06)",borderRadius:2,overflow:"hidden"}}>
+              <div style={{height:"100%",width:`${rankProgress*100}%`,background:"linear-gradient(90deg,#C8A96E,#E8B84B)",borderRadius:2,boxShadow:"0 0 8px rgba(200,169,110,0.4)"}}/>
+            </div>
+            <div style={{fontSize:9,color:"#6B6255",textAlign:"center",marginTop:5}}>{dragonPoints} Dragon Points · {nextRank.min-dragonPoints} to {nextRank.title}</div>
+          </div>
+        )}
+        <div style={{fontSize:10,color:"#9A8E77",marginTop:8}}><span style={{color:"#C8A96E",fontFamily:"'Cinzel',serif",fontWeight:700}}>{unlocked.size}</span> of <span style={{color:"#C8A96E",fontFamily:"'Cinzel',serif",fontWeight:700}}>{totalBadges}</span> badges unlocked</div>
+      </div>
+
+      {PILLARS.map(pillar=>(
+        <div key={pillar.key} style={{padding:"0 16px 32px",maxWidth:480,margin:"0 auto"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+            <div style={{flex:1,height:1,background:`rgba(${hexToRgb(pillar.color)},0.2)`}}/>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <span style={{fontSize:16,filter:`drop-shadow(0 0 6px ${pillar.color})`}}>{pillar.icon}</span>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:"0.2em",color:pillar.color,textTransform:"uppercase"}}>{pillar.label}</span>
+            </div>
+            <div style={{flex:1,height:1,background:`rgba(${hexToRgb(pillar.color)},0.2)`}}/>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:0}}>
+            {pillar.practices.map((practice,pIdx)=>{
+              const practiceBadges=BADGES[practice.key]||[];
+              const vol=pCounts[practice.key]?.volume||0;
+              const streak=getPracticeStreak(data,pillar.key,practice.label,todayKey);
+              const isLast=pIdx===pillar.practices.length-1;
+              return (
+                <div key={practice.key} style={{display:"flex",gap:0}}>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:32,flexShrink:0}}>
+                    <div style={{width:2,height:16,background:`rgba(${hexToRgb(pillar.color)},0.25)`}}/>
+                    <div style={{width:10,height:10,borderRadius:"50%",background:vol>0?pillar.color:"rgba(255,255,255,0.1)",boxShadow:vol>0?`0 0 8px ${pillar.color}`:"none",flexShrink:0}}/>
+                    {!isLast&&<div style={{width:2,flex:1,minHeight:16,background:`rgba(${hexToRgb(pillar.color)},0.25)`}}/>}
+                  </div>
+                  <div style={{flex:1,paddingLeft:10,paddingBottom:isLast?0:20}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8,marginTop:4}}>
+                      <span style={{fontSize:13}}>{practice.icon}</span>
+                      <span style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:"0.1em",color:vol>0?pillar.color:"#6B6255",textTransform:"uppercase"}}>{practice.label}</span>
+                      <span style={{fontSize:9,color:"#6B6255",marginLeft:"auto"}}>{vol}×</span>
+                    </div>
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                      {practiceBadges.map((badge,bIdx)=>{
+                        const isUnlocked=unlocked.has(badge.id);
+                        const isVolume=badge.type==="volume";
+                        const progress=isVolume?Math.min(vol/badge.req,1):Math.min(streak/badge.req,1);
+                        const tierColors=["#CD7F32","#C0C0C0","#FFD700","#C8A96E"];
+                        const tierColor=isUnlocked?tierColors[bIdx]||"#C8A96E":"rgba(255,255,255,0.08)";
+                        return (
+                          <div key={badge.id} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,width:64}}>
+                            <div style={{position:"relative",width:48,height:52}}>
+                              <svg viewBox="0 0 48 52" width="48" height="52">
+                                <path d="M24,2 L44,10 L44,26 C44,38 24,50 24,50 C24,50 4,38 4,26 L4,10 Z" fill={isUnlocked?`rgba(${hexToRgb(tierColor)},0.15)`:"rgba(255,255,255,0.03)"} stroke={tierColor} strokeWidth={isUnlocked?1.5:0.5}/>
+                              </svg>
+                              <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",paddingBottom:4}}>
+                                {isUnlocked?(
+                                  <span style={{fontSize:18,filter:`drop-shadow(0 0 6px ${tierColor})`}}>
+                                    {bIdx===0?"🥉":bIdx===1?"🥈":bIdx===2?"🥇":"🔥"}
+                                  </span>
+                                ):(
+                                  <span style={{fontSize:14,opacity:0.3}}>🔒</span>
+                                )}
+                              </div>
+                              {!isUnlocked&&progress>0&&(
+                                <svg viewBox="0 0 48 52" width="48" height="52" style={{position:"absolute",inset:0}}>
+                                  <path d="M24,2 L44,10 L44,26 C44,38 24,50 24,50 C24,50 4,38 4,26 L4,10 Z" fill="none" stroke={pillar.color} strokeWidth="2" strokeDasharray={`${progress*120} 120`} opacity="0.5"/>
+                                </svg>
+                              )}
+                            </div>
+                            <div style={{fontSize:8,color:isUnlocked?tierColor:"#4A4438",textAlign:"center",lineHeight:1.3,letterSpacing:"0.02em",fontFamily:"'Cinzel',serif"}}>{badge.name}</div>
+                            {!isUnlocked&&<div style={{fontSize:7,color:"#4A4438",textAlign:"center"}}>{isVolume?`${vol}/${badge.req}`:`${streak}/${badge.req}d`}</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FocusOverlay({data,setData,today,todayKey,onClose}){
+  const [phase,setPhase]=useState("idle");
+  const [timeLeft,setTimeLeft]=useState(WORK_DURATION);
+  const [selectedPillar,setSelectedPillar]=useState(null);
+  const [selectedPractice,setSelectedPractice]=useState(null);
+  const [sessionLogged,setSessionLogged]=useState(false);
+  const intervalRef=useRef(null);
+  const totalRef=useRef(WORK_DURATION);
+
+  useEffect(()=>{
+    if(phase==="work"||phase==="rest"){
+      intervalRef.current=setInterval(()=>{
+        setTimeLeft(t=>{
+          if(t<=1){
+            clearInterval(intervalRef.current);
+            if(phase==="work"){ logSession(); setPhase("rest"); setTimeLeft(REST_DURATION); totalRef.current=REST_DURATION; }
+            else setPhase("done");
+            return 0;
+          }
+          return t-1;
+        });
+      },1000);
+    }
+    return ()=>clearInterval(intervalRef.current);
+  },[phase]);
+
+  function logSession(){
+    if(!selectedPillar) return;
+    setData(prev=>{
+      const entry={...(prev[todayKey]||{})};
+      entry[selectedPillar]=true;
+      if(selectedPractice){ const ex=entry[`${selectedPillar}_practices`]||[]; if(!ex.includes(selectedPractice)) entry[`${selectedPillar}_practices`]=[...ex,selectedPractice]; }
+      return {...prev,[todayKey]:entry};
+    });
+    setSessionLogged(true);
+  }
+  function startSession(){ if(!selectedPillar) return; setPhase("work"); setTimeLeft(WORK_DURATION); totalRef.current=WORK_DURATION; setSessionLogged(false); }
+  function markDone(){ clearInterval(intervalRef.current); logSession(); setPhase("rest"); setTimeLeft(REST_DURATION); totalRef.current=REST_DURATION; }
+  function reset(){ clearInterval(intervalRef.current); setPhase("idle"); setTimeLeft(WORK_DURATION); setSessionLogged(false); setSelectedPillar(null); setSelectedPractice(null); }
+
+  const progress=phase==="idle"?0:1-(timeLeft/totalRef.current);
+  const radius=90,circ=2*Math.PI*radius,dash=circ*(1-progress);
+  const activePillar=PILLARS.find(p=>p.key===selectedPillar);
+  const phaseColor=phase==="rest"?"#5B8FD4":phase==="done"?"#C8A96E":activePillar?.color||"#C8A96E";
+
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(8,10,14,0.97)",backdropFilter:"blur(8px)",overflowY:"auto",paddingTop:"env(safe-area-inset-top)",paddingBottom:"env(safe-area-inset-bottom)"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"48px 24px 20px"}}>
+        <div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.35em",color:"#C8A96E",opacity:0.7,marginBottom:4,textTransform:"uppercase"}}>Ultradian</div>
+          <h2 style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:700,color:"#C8A96E",letterSpacing:"0.06em"}}>Focus Session</h2>
+        </div>
+        <button onClick={onClose} style={{background:"none",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 14px",cursor:"pointer",color:"#9A8E77",fontSize:11,fontFamily:"'Cinzel',serif",letterSpacing:"0.1em"}}>Close</button>
+      </div>
+      <div style={{maxWidth:480,margin:"0 auto",padding:"0 24px"}}>
+        {phase==="idle"&&(
+          <div style={{marginBottom:24}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.2em",color:"#6B6255",textTransform:"uppercase",textAlign:"center",marginBottom:10}}>Training for</div>
+            <div style={{display:"flex",justifyContent:"center",gap:8,flexWrap:"wrap",marginBottom:16}}>
+              {PILLARS.map(p=>{ const isSel=selectedPillar===p.key; return <button key={p.key} onClick={()=>{setSelectedPillar(p.key);setSelectedPractice(null);}} style={{background:isSel?p.dim:"rgba(255,255,255,0.03)",border:`1px solid ${isSel?p.color:"rgba(255,255,255,0.1)"}`,borderRadius:100,padding:"8px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,transition:"all 0.2s",boxShadow:isSel?`0 0 12px ${p.glow}`:"none"}}><span style={{fontSize:13}}>{p.icon}</span><span style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.1em",color:isSel?p.color:"#9A8E77",textTransform:"uppercase"}}>{p.label}</span></button>; })}
+            </div>
+            {selectedPillar&&(
+              <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:14}}>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.2em",color:"#6B6255",textTransform:"uppercase",marginBottom:10}}>Practice (optional)</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                  <button onClick={()=>setSelectedPractice(null)} style={{background:!selectedPractice?`rgba(${hexToRgb(activePillar.color)},0.1)`:"rgba(255,255,255,0.02)",border:`1px solid ${!selectedPractice?activePillar.color:"rgba(255,255,255,0.08)"}`,borderRadius:100,padding:"6px 12px",cursor:"pointer",fontSize:10,color:!selectedPractice?activePillar.color:"#6B6255"}}>General</button>
+                  {activePillar?.practices.map(p=><button key={p.key} onClick={()=>setSelectedPractice(p.label)} style={{background:selectedPractice===p.label?`rgba(${hexToRgb(activePillar.color)},0.1)`:"rgba(255,255,255,0.02)",border:`1px solid ${selectedPractice===p.label?activePillar.color:"rgba(255,255,255,0.08)"}`,borderRadius:100,padding:"6px 12px",cursor:"pointer",fontSize:10,color:selectedPractice===p.label?activePillar.color:"#6B6255"}}>{p.icon} {p.label}</button>)}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        <div style={{display:"flex",justifyContent:"center",marginBottom:24}}>
+          <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <svg width={210} height={210} style={{transform:"rotate(-90deg)"}}>
+              <circle cx={105} cy={105} r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={8}/>
+              <circle cx={105} cy={105} r={radius} fill="none" stroke={phaseColor} strokeWidth={8} strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={dash} style={{transition:"stroke-dashoffset 0.9s linear, stroke 0.4s",filter:`drop-shadow(0 0 8px ${phaseColor})`}}/>
+            </svg>
+            <div style={{position:"absolute",textAlign:"center"}}>
+              {phase==="done"?(<><div style={{fontSize:32}}>🐉</div><div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#C8A96E",letterSpacing:"0.1em",marginTop:6}}>Complete</div></>):(<><div style={{fontFamily:"'Cinzel',serif",fontSize:34,fontWeight:700,color:phaseColor,lineHeight:1}}>{fmtTime(timeLeft)}</div><div style={{fontSize:9,letterSpacing:"0.18em",color:"#9A8E77",marginTop:6,textTransform:"uppercase"}}>{phase==="idle"?"90 min":phase==="work"?`${activePillar?.icon||""} ${selectedPractice||activePillar?.label||""}`:"⚡ Rest"}</div>{sessionLogged&&phase==="rest"&&<div style={{fontSize:9,color:activePillar?.color||"#C8A96E",marginTop:4}}>✓ logged</div>}</>)}
+            </div>
+          </div>
+        </div>
+        <div style={{display:"flex",justifyContent:"center",gap:10,flexWrap:"wrap"}}>
+          {phase==="idle"&&<button onClick={startSession} disabled={!selectedPillar} style={{background:selectedPillar?`rgba(${hexToRgb(activePillar?.color||"#C8A96E")},0.15)`:"rgba(255,255,255,0.04)",border:`1px solid ${selectedPillar?activePillar?.color||"#C8A96E":"rgba(255,255,255,0.08)"}`,borderRadius:100,padding:"12px 32px",cursor:selectedPillar?"pointer":"not-allowed",fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:"0.15em",color:selectedPillar?activePillar?.color||"#C8A96E":"#6B6255",textTransform:"uppercase"}}>Begin Session</button>}
+          {phase==="work"&&<><button onClick={markDone} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:100,padding:"10px 20px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.12em",color:"#9A8E77",textTransform:"uppercase"}}>Mark Done</button><button onClick={reset} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:100,padding:"10px 20px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.12em",color:"#6B6255",textTransform:"uppercase"}}>Cancel</button></>}
+          {phase==="rest"&&<button onClick={reset} style={{background:"rgba(91,143,212,0.1)",border:"1px solid #5B8FD4",borderRadius:100,padding:"10px 24px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.12em",color:"#5B8FD4",textTransform:"uppercase"}}>End Rest</button>}
+          {phase==="done"&&<button onClick={reset} style={{background:"rgba(200,169,110,0.1)",border:"1px solid #C8A96E",borderRadius:100,padding:"12px 28px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:"0.15em",color:"#C8A96E",textTransform:"uppercase"}}>New Session</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TabBar({active,onSelect}){
+  const tabs=[{key:"home",icon:"🐉",label:"Home"},...PILLARS.map(p=>({key:p.key,icon:p.icon,label:p.label,color:p.color})),{key:"badges",icon:"🏆",label:"Badges",color:"#C8A96E"}];
+  return (
+    <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,background:"rgba(10,12,18,0.97)",borderTop:"1px solid rgba(200,169,110,0.15)",display:"flex",justifyContent:"space-around",alignItems:"center",paddingTop:8,paddingBottom:"calc(8px + env(safe-area-inset-bottom))",backdropFilter:"blur(12px)"}}>
+      {tabs.map(t=>{ const isActive=active===t.key; const col=t.color||"#C8A96E"; return (
+        <button key={t.key} onClick={()=>onSelect(t.key)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"4px 4px",transition:"all 0.2s",opacity:isActive?1:0.45}}>
+          <span style={{fontSize:16,filter:isActive?`drop-shadow(0 0 6px ${col})`:"none"}}>{t.icon}</span>
+          <span style={{fontSize:7,letterSpacing:"0.08em",textTransform:"uppercase",color:isActive?col:"#6B6255",fontFamily:"'Cinzel',serif"}}>{t.label}</span>
+          {isActive&&<div style={{width:12,height:1.5,background:col,borderRadius:1,boxShadow:`0 0 6px ${col}`}}/>}
+        </button>
+      ); })}
+    </div>
+  );
+}
+
+
+function HomeTab({data,setData,today,todayKey,streak,dragonPoints,dpStreak,onShowCreed,onShowStats,onShowFocus}){
+  const [viewYear,setViewYear]=useState(today.getFullYear());
+  const [viewMonth,setViewMonth]=useState(today.getMonth());
+  const [selected,setSelected]=useState(null);
+  const [practicePanel,setPracticePanel]=useState(null);
+  const [flash,setFlash]=useState(null);
+  const oath=OATHS[today.getDay()%OATHS.length];
+  const rank=getRank(dragonPoints);
+  const rankIdx=RANKS.indexOf(rank);
+  const nextRank=RANKS[rankIdx+1];
+  const rankProgress=nextRank?(dragonPoints-rank.min)/(nextRank.min-rank.min):1;
+
+  useEffect(()=>{ if(flash){ const t=setTimeout(()=>setFlash(null),1400); return ()=>clearTimeout(t); } },[flash]);
+
+  function handlePillarTap(pillarKey,year,month,day){
+    const pillar=PILLARS.find(p=>p.key===pillarKey);
+    const k=dayKey(year,month,day);
+    const existing=(data[k]||{})[`${pillarKey}_practices`]||[];
+    setPracticePanel({pillar,year,month,day,existing});
+  }
+
+  function savePractices(year,month,day,pillarKey,practices){
+    const k=dayKey(year,month,day);
+    setData(prev=>{
+      const entry={...(prev[k]||{})};
+      if(practices.length>0){ entry[pillarKey]=true; entry[`${pillarKey}_practices`]=practices; }
+      else{ entry[pillarKey]=false; delete entry[`${pillarKey}_practices`]; }
+      const next={...prev,[k]:entry};
+      if(PILLARS.every(p=>next[k][p.key])) setFlash(k);
+      return next;
+    });
+    setPracticePanel(null);
+  }
+
+  const daysInMonth=getDaysInMonth(viewYear,viewMonth);
+  const firstDay=getFirstDay(viewYear,viewMonth);
+  const todayEntry=data[todayKey]||{};
+  const todayDone=PILLARS.filter(p=>todayEntry[p.key]).length;
+  const selKey=selected?dayKey(selected.year,selected.month,selected.day):null;
+  const selEntry=selKey?(data[selKey]||{}):{};
+  const todayFull=PILLARS.every(p=>todayEntry[p.key]);
+
+  return (
+    <>
+      {practicePanel&&<PracticePanel pillar={practicePanel.pillar} existingPractices={practicePanel.existing} onSave={(practices)=>savePractices(practicePanel.year,practicePanel.month,practicePanel.day,practicePanel.pillar.key,practices)} onClose={()=>setPracticePanel(null)}/>}
+      <div style={{paddingBottom:90}}>
+        <div style={{textAlign:"center",padding:"32px 24px 20px",position:"relative"}}>
+          <button onClick={onShowStats} style={{position:"absolute",top:24,left:12,background:"rgba(200,169,110,0.08)",border:"1px solid rgba(200,169,110,0.25)",borderRadius:10,padding:"10px 16px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.15em",color:"#C8A96E",textTransform:"uppercase",minWidth:64,minHeight:40}}>Stats</button>
+          <button onClick={onShowCreed} style={{position:"absolute",top:24,right:12,background:"rgba(200,169,110,0.08)",border:"1px solid rgba(200,169,110,0.25)",borderRadius:10,padding:"10px 16px",cursor:"pointer",fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.15em",color:"#C8A96E",textTransform:"uppercase",minWidth:64,minHeight:40}}>Creed</button>
+          <div style={{fontSize:44,marginBottom:8,filter:"drop-shadow(0 0 20px #C8A96E)"}}>{rank.icon}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.35em",color:"#C8A96E",opacity:0.6,marginBottom:4,textTransform:"uppercase"}}>You are</div>
+          <h1 style={{fontFamily:"'Cinzel',serif",fontSize:"clamp(22px,6vw,34px)",fontWeight:700,color:"#C8A96E",margin:"0 0 6px",letterSpacing:"0.06em"}}>{rank.title}</h1>
+          <p style={{fontSize:12,color:"#9A8E77",fontStyle:"italic",marginBottom:14,lineHeight:1.6}}>{rank.desc}</p>
+          {nextRank&&<div style={{maxWidth:200,margin:"0 auto 14px"}}><div style={{height:3,background:"rgba(255,255,255,0.06)",borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:`${rankProgress*100}%`,background:"linear-gradient(90deg,#C8A96E,#E8B84B)",borderRadius:2,boxShadow:"0 0 8px rgba(200,169,110,0.4)"}}/></div><div style={{fontSize:8,color:"#6B6255",textAlign:"center",marginTop:4}}>{nextRank.min-dragonPoints} Dragon Points to {nextRank.title}</div></div>}
+          <div style={{width:48,height:1,background:"linear-gradient(90deg,transparent,#C8A96E,transparent)",margin:"0 auto 12px"}}/>
+          <p style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#9A8E77",fontStyle:"italic",letterSpacing:"0.03em",maxWidth:300,margin:"0 auto",lineHeight:1.7}}>"{oath}"</p>
+        </div>
+
+        <div style={{display:"flex",justifyContent:"center",gap:8,padding:"0 24px 20px",flexWrap:"wrap"}}>
+          {[{val:dragonPoints,label:"Dragon Pts"},{val:dpStreak,label:"Pt Streak"},{val:streak,label:"Streak"},{val:`${todayDone}/4`,label:"Today",highlight:todayFull}].map(s=>(
+            <div key={s.label} style={{background:s.highlight?"rgba(200,169,110,0.12)":"rgba(200,169,110,0.07)",border:`1px solid ${s.highlight?"rgba(200,169,110,0.4)":"rgba(200,169,110,0.18)"}`,borderRadius:12,padding:"10px 12px",textAlign:"center",minWidth:72,boxShadow:s.highlight?"0 0 16px rgba(200,169,110,0.2)":"none"}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:700,color:"#C8A96E",lineHeight:1}}>{s.val}</div>
+              <div style={{fontSize:7,letterSpacing:"0.15em",color:"#9A8E77",marginTop:4,textTransform:"uppercase"}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {todayFull&&<div style={{display:"flex",justifyContent:"center",marginBottom:16}}><div style={{background:"rgba(200,169,110,0.1)",border:"1px solid rgba(200,169,110,0.3)",borderRadius:100,padding:"6px 16px",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:12}}>🐉</span><span style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.15em",color:"#C8A96E",textTransform:"uppercase"}}>Dragon Point Earned Today</span></div></div>}
+
+        <div style={{display:"flex",justifyContent:"center",gap:8,padding:"0 16px 20px",flexWrap:"wrap"}}>
+          {PILLARS.map(p=>{ const done=todayEntry[p.key]; const practices=todayEntry[`${p.key}_practices`]||[]; return (
+            <button key={p.key} onClick={()=>handlePillarTap(p.key,today.getFullYear(),today.getMonth(),today.getDate())} style={{background:done?p.dim:"rgba(255,255,255,0.03)",border:`1px solid ${done?p.color:"rgba(255,255,255,0.1)"}`,borderRadius:100,padding:"8px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:5,transition:"all 0.2s",boxShadow:done?`0 0 14px ${p.glow}`:"none"}}>
+              <span style={{fontSize:12}}>{p.icon}</span>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.1em",color:done?p.color:"#9A8E77",textTransform:"uppercase"}}>{p.label}</span>
+              {done&&<span style={{fontSize:8,color:p.color,opacity:0.8}}>{practices.length>0?`${practices.length}`:"✓"}</span>}
+            </button>
+          ); })}
+        </div>
+
+        <div style={{display:"flex",justifyContent:"center",padding:"0 24px 24px"}}>
+          <button onClick={onShowFocus} style={{background:"rgba(200,169,110,0.06)",border:"1px solid rgba(200,169,110,0.2)",borderRadius:12,padding:"12px 28px",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:16}}>⏱</span>
+            <div style={{textAlign:"left"}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.15em",color:"#C8A96E",textTransform:"uppercase"}}>Focus Session</div>
+              <div style={{fontSize:9,color:"#6B6255",marginTop:1}}>90 min ultradian block</div>
+            </div>
+          </button>
+        </div>
+
+        <div style={{maxWidth:400,margin:"0 auto",padding:"0 12px"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+            <button onClick={()=>{if(viewMonth===0){setViewYear(y=>y-1);setViewMonth(11);}else setViewMonth(m=>m-1);}} style={{background:"none",border:"none",color:"#9A8E77",fontSize:20,cursor:"pointer",padding:"4px 10px"}}>‹</button>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:12,letterSpacing:"0.15em",color:"#C8A96E"}}>{MONTHS[viewMonth]} {viewYear}</span>
+            <button onClick={()=>{if(viewMonth===11){setViewYear(y=>y+1);setViewMonth(0);}else setViewMonth(m=>m+1);}} style={{background:"none",border:"none",color:"#9A8E77",fontSize:20,cursor:"pointer",padding:"4px 10px"}}>›</button>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3,marginBottom:4}}>
+            {DAYS.map(d=><div key={d} style={{textAlign:"center",fontSize:8,color:"#6B6255",textTransform:"uppercase",padding:"2px 0"}}>{d}</div>)}
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3}}>
+            {Array.from({length:firstDay}).map((_,i)=><div key={`e${i}`}/>)}
+            {Array.from({length:daysInMonth}).map((_,i)=>{
+              const day=i+1;
+              const k=dayKey(viewYear,viewMonth,day);
+              const entry=data[k]||{};
+              const donePillars=PILLARS.filter(p=>entry[p.key]);
+              const isToday=k===todayKey;
+              const isSel=selKey===k;
+              const isFull=donePillars.length===4;
+              const isFlashing=flash===k;
+              const dayCol=isFull?"#C8A96E":donePillars.length>0?donePillars[donePillars.length-1].color:null;
+              return (
+                <div key={day} onClick={()=>setSelected(isSel?null:{year:viewYear,month:viewMonth,day})} style={{aspectRatio:"1",borderRadius:7,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",background:isSel?"rgba(200,169,110,0.12)":dayCol?`rgba(${hexToRgb(dayCol)},0.1)`:"rgba(255,255,255,0.03)",border:isToday?`1.5px solid ${dayCol||"#C8A96E"}`:isSel?"1px solid rgba(200,169,110,0.4)":"1px solid rgba(255,255,255,0.06)",boxShadow:isFlashing?`0 0 20px rgba(200,169,110,0.7)`:isFull?`0 0 8px rgba(200,169,110,0.2)`:dayCol?`0 0 5px rgba(${hexToRgb(dayCol)},0.15)`:"none"}}>
+                  <span style={{fontSize:"clamp(8px,2vw,11px)",fontWeight:isToday?600:400,color:dayCol||(isToday?"#C8A96E":"#6B6255")}}>{day}</span>
+                  {donePillars.length>0&&<div style={{display:"flex",gap:1.5,marginTop:2}}>{PILLARS.map(p=><div key={p.key} style={{width:2.5,height:2.5,borderRadius:"50%",background:entry[p.key]?p.color:"rgba(255,255,255,0.07)",boxShadow:entry[p.key]?`0 0 3px ${p.color}`:"none"}}/>)}</div>}
+                  {isFull&&<div style={{fontSize:6,marginTop:1}}>🐉</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {selected&&(
+          <div style={{maxWidth:400,margin:"14px auto 0",padding:"0 12px"}}>
+            <div style={{background:"rgba(200,169,110,0.05)",border:"1px solid rgba(200,169,110,0.2)",borderRadius:14,padding:16}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.2em",color:"#C8A96E",marginBottom:10,textTransform:"uppercase"}}>{MONTHS[selected.month]} {selected.day}</div>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                {PILLARS.map(p=>{ const done=selEntry[p.key]; const practices=selEntry[`${p.key}_practices`]||[]; return (
+                  <button key={p.key} onClick={()=>handlePillarTap(p.key,selected.year,selected.month,selected.day)} style={{background:done?p.dim:"rgba(255,255,255,0.02)",border:`1px solid ${done?p.color:"rgba(255,255,255,0.08)"}`,borderRadius:10,padding:"10px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:10,transition:"all 0.2s",boxShadow:done?`0 0 12px ${p.glow}`:"none"}}>
+                    <span style={{fontSize:15}}>{p.icon}</span>
+                    <div style={{textAlign:"left",flex:1}}>
+                      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:"0.1em",color:done?p.color:"#9A8E77",textTransform:"uppercase"}}>{p.label}</div>
+                      {practices.length>0&&<div style={{fontSize:9,color:"#6B6255",marginTop:2}}>{practices.slice(0,2).join(", ")}{practices.length>2?` +${practices.length-2}`:""}</div>}
+                    </div>
+                    <div style={{width:15,height:15,borderRadius:"50%",border:`1.5px solid ${done?p.color:"rgba(255,255,255,0.15)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                      {done&&<div style={{width:6,height:6,borderRadius:"50%",background:p.color,boxShadow:`0 0 4px ${p.color}`}}/>}
+                    </div>
+                  </button>
+                ); })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div style={{display:"flex",justifyContent:"center",gap:12,flexWrap:"wrap",padding:"16px 16px 0"}}>
+          {[...PILLARS.map(p=>({label:p.sub,color:p.color})),{label:"Full Day",color:"#C8A96E"}].map(l=>(
+            <div key={l.label} style={{display:"flex",alignItems:"center",gap:4}}>
+              <div style={{width:5,height:5,borderRadius:"50%",background:l.color,boxShadow:`0 0 4px ${l.color}`}}/>
+              <span style={{fontSize:8,letterSpacing:"0.1em",color:"#6B6255",textTransform:"uppercase"}}>{l.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ElementTab({pillar}){
+  return (
+    <div style={{paddingBottom:90,maxWidth:480,margin:"0 auto"}}>
+      <div style={{padding:"40px 24px 24px",textAlign:"center"}}>
+        <div style={{fontSize:40,marginBottom:12,filter:`drop-shadow(0 0 16px ${pillar.color})`}}>{pillar.icon}</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.35em",color:pillar.color,opacity:0.7,marginBottom:6,textTransform:"uppercase"}}>The {pillar.sub} Path</div>
+        <h2 style={{fontFamily:"'Cinzel',serif",fontSize:"clamp(22px,5vw,32px)",fontWeight:700,color:pillar.color,margin:"0",letterSpacing:"0.06em"}}>{pillar.label}</h2>
+        <div style={{width:40,height:1.5,background:`linear-gradient(90deg,transparent,${pillar.color},transparent)`,margin:"14px auto 0"}}/>
+      </div>
+      <div style={{padding:"0 16px 24px"}}>
+        <div style={{background:`rgba(${hexToRgb(pillar.color)},0.07)`,border:`1px solid rgba(${hexToRgb(pillar.color)},0.3)`,borderRadius:14,padding:20}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.25em",color:pillar.color,opacity:0.6,textTransform:"uppercase",marginBottom:12}}>Identity</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:"#D4C9B0",lineHeight:1.9,fontStyle:"italic"}}>{pillar.identity}</div>
+        </div>
+      </div>
+      <div style={{padding:"0 20px 24px"}}><p style={{fontSize:12,color:"#9A8E77",lineHeight:1.8,textAlign:"center"}}>{pillar.premise}</p></div>
+      <div style={{display:"flex",alignItems:"center",gap:12,padding:"0 24px 20px"}}>
+        <div style={{flex:1,height:"1px",background:"rgba(255,255,255,0.06)"}}/>
+        <span style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:"0.25em",color:"#6B6255",textTransform:"uppercase"}}>Practices</span>
+        <div style={{flex:1,height:"1px",background:"rgba(255,255,255,0.06)"}}/>
+      </div>
+      <div style={{padding:"0 16px",display:"flex",flexDirection:"column",gap:12}}>
+        {pillar.practices.map(p=>(
+          <div key={p.key} style={{background:`rgba(${hexToRgb(pillar.color)},0.04)`,border:`1px solid rgba(${hexToRgb(pillar.color)},0.14)`,borderLeft:`3px solid ${pillar.color}`,borderRadius:12,padding:"14px 16px"}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:12,letterSpacing:"0.1em",color:pillar.color,marginBottom:6,textTransform:"uppercase"}}>{p.icon} {p.label}</div>
+            <div style={{fontSize:11,color:"#9A8E77",lineHeight:1.7}}>{p.desc}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DragonWarrior(){
+  const [tab,setTab]=useState("home");
+  const [data,setData]=useState(loadData);
+  const [showCreed,setShowCreed]=useState(false);
+  const [showStats,setShowStats]=useState(false);
+  const [showFocus,setShowFocus]=useState(false);
+  const today=new Date();
+  const todayKey=dayKey(today.getFullYear(),today.getMonth(),today.getDate());
+
+  useEffect(()=>{ saveData(data); },[data]);
+
+  function getStreak(){
+    let streak=0; const d=new Date(today);
+    while(streak<=365){
+      const k=dayKey(d.getFullYear(),d.getMonth(),d.getDate());
+      const entry=data[k]||{};
+      const count=PILLARS.filter(p=>entry[p.key]).length;
+      if(count===0&&k!==todayKey) break;
+      if(count>0) streak++;
+      d.setDate(d.getDate()-1);
+    }
+    return streak;
+  }
+
+  const streak=getStreak();
+  const dragonPoints=getDragonPoints(data);
+  const dpStreak=getDragonPointStreak(data,todayKey);
+
+  return (
+    <div style={{minHeight:"100vh",background:"#0D0F14",backgroundImage:SCALE_BG,fontFamily:"'Inter',system-ui,sans-serif",color:"#D4C9B0"}}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap');
+        * { box-sizing:border-box; margin:0; padding:0; }
+        button { font-family:inherit; }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(200,169,110,0.2); border-radius:2px; }
+      `}</style>
+
+      {showCreed&&<CreedScreen onClose={()=>setShowCreed(false)}/>}
+      {showStats&&<StatsModal data={data} streak={streak} dragonPoints={dragonPoints} dpStreak={dpStreak} onClose={()=>setShowStats(false)} onReset={()=>setData({})}/>}
+      {showFocus&&<FocusOverlay data={data} setData={setData} today={today} todayKey={todayKey} onClose={()=>setShowFocus(false)}/>}
+
+      {tab==="home"   &&<HomeTab data={data} setData={setData} today={today} todayKey={todayKey} streak={streak} dragonPoints={dragonPoints} dpStreak={dpStreak} onShowCreed={()=>setShowCreed(true)} onShowStats={()=>setShowStats(true)} onShowFocus={()=>setShowFocus(true)}/>}
+      {tab==="body"   &&<ElementTab pillar={PILLARS[0]}/>}
+      {tab==="mind"   &&<ElementTab pillar={PILLARS[1]}/>}
+      {tab==="craft"  &&<ElementTab pillar={PILLARS[2]}/>}
+      {tab==="energy" &&<ElementTab pillar={PILLARS[3]}/>}
+      {tab==="badges" &&<BadgesPage data={data} dragonPoints={dragonPoints} todayKey={todayKey}/>}
+
+      <TabBar active={tab} onSelect={setTab}/>
+    </div>
+  );
+}
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(DragonWarrior));
+  </script>
+</body>
+</html>
